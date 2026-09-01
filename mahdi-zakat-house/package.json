@@ -1,0 +1,12 @@
+{
+  "name": "mahdi-zakat-house",
+  "version": "1.0.0",
+  "description": "Plateforme de sensibilisation et de collecte de la Zakat - Communauté Layenne",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^7.1.0"
+  }
+}

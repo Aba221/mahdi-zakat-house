@@ -1,0 +1,4 @@
+// Service worker minimal - pattern pass-through (pas de cache complexe)
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', () => {}); // pass-through
