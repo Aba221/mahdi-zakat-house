@@ -7,6 +7,7 @@
 
 const { verifyInvoice } = require('./lib/paydunya');
 const { getDonation, saveDonation } = require('./lib/donations-store');
+const { connectLambda } = require('@netlify/blobs');
 
 function parseBody(event) {
   const contentType = event.headers['content-type'] || event.headers['Content-Type'] || '';
@@ -34,6 +35,8 @@ function extractToken(body) {
 }
 
 exports.handler = async (event) => {
+  connectLambda(event); // active le contexte Netlify Blobs (mode Lambda)
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Méthode non autorisée' };
   }

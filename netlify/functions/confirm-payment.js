@@ -6,8 +6,11 @@
 
 const { verifyInvoice } = require('./lib/paydunya');
 const { getDonation, saveDonation } = require('./lib/donations-store');
+const { connectLambda } = require('@netlify/blobs');
 
 exports.handler = async (event) => {
+  connectLambda(event); // active le contexte Netlify Blobs (mode Lambda)
+
   const refCommand = event.queryStringParameters && event.queryStringParameters.ref;
   if (!refCommand) {
     return { statusCode: 400, body: JSON.stringify({ success: false, message: 'Référence manquante.' }) };

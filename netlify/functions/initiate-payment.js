@@ -8,6 +8,7 @@
 
 const { createInvoice } = require('./lib/paydunya');
 const { saveDonation } = require('./lib/donations-store');
+const { connectLambda } = require('@netlify/blobs');
 
 const POCHE_LABELS = {
   A: 'Zakat / Solidarité',
@@ -17,6 +18,8 @@ const POCHE_LABELS = {
 };
 
 exports.handler = async (event) => {
+  connectLambda(event); // active le contexte Netlify Blobs (mode Lambda)
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ success: false, message: 'Méthode non autorisée' }) };
   }

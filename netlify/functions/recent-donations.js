@@ -4,8 +4,11 @@
 // exposée (pas de téléphone, pas d'email, pas de nom complet).
 
 const { listDonations } = require('./lib/donations-store');
+const { connectLambda } = require('@netlify/blobs');
 
-exports.handler = async () => {
+exports.handler = async (event) => {
+  connectLambda(event); // active le contexte Netlify Blobs (mode Lambda)
+
   const records = await listDonations();
 
   const donations = records
