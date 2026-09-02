@@ -1,16 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&display=swap');
 
 :root{
-  --ink:#20261c;
-  --ink-soft:#3d4536;
-  --parchment:#faf6ec;
-  --sand:#efe4c8;
-  --olive:#3d5c34;
-  --olive-deep:#293d22;
-  --ochre:#b8863e;
-  --ochre-deep:#96692c;
-  --line:#d8cba4;
-  --white:#fffdf7;
+  --ink:#142a1f;
+  --ink-soft:#43594c;
+  --parchment:#fbfbf7;
+  --sand:#e9f7ef;
+  --olive:#0e8a56;
+  --olive-deep:#075c39;
+  --ochre:#c9a227;
+  --ochre-deep:#a6841e;
+  --line:#dceee3;
+  --white:#ffffff;
 
   --serif: 'Fraunces', Georgia, serif;
   --sans: 'Karla', -apple-system, sans-serif;
@@ -188,9 +188,9 @@ section.alt{background:var(--sand)}
   font-family:var(--serif); font-weight:600; color:var(--white); background:var(--olive);
   border-radius:var(--radius); padding:6px 12px; font-size:0.85rem; text-align:center; height:fit-content;
 }
-.compart-row.b .tag{background:#8a6a2e}
-.compart-row.c .tag{background:#4a6e50}
-.compart-row.d .tag{background:#6b5b95}
+.compart-row.b .tag{background:#b8952e}
+.compart-row.c .tag{background:#2f7b5e}
+.compart-row.d .tag{background:#1f4d3a}
 .compart-row h4{font-size:1rem; margin-bottom:4px}
 .compart-row p{font-size:0.92rem; color:var(--ink-soft)}
 
@@ -275,9 +275,9 @@ section.alt{background:var(--sand)}
   padding:13px 14px; font-weight:600; font-size:0.88rem; color:var(--ink);
 }
 .poche-chip .poche-dot{width:11px; height:11px; border-radius:50%; background:var(--olive); flex-shrink:0}
-.poche-chip.poche-b .poche-dot{background:#8a6a2e}
-.poche-chip.poche-c .poche-dot{background:#4a6e50}
-.poche-chip.poche-d .poche-dot{background:#6b5b95}
+.poche-chip.poche-b .poche-dot{background:#b8952e}
+.poche-chip.poche-c .poche-dot{background:#2f7b5e}
+.poche-chip.poche-d .poche-dot{background:#1f4d3a}
 .poche-chip.active{border-color:var(--ochre); background:var(--sand)}
 
 /* ---------- Fréquence de don ---------- */
