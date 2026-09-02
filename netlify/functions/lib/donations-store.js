@@ -10,6 +10,14 @@ const { getStore } = require('@netlify/blobs');
 
 function safeGetStore() {
   try {
+    // Configuration manuelle (BLOBS_SITE_ID / BLOBS_TOKEN) si la
+    // configuration automatique de Netlify Blobs n'est pas disponible sur
+    // ce site — voir README pour comment obtenir ces deux valeurs.
+    const siteID = process.env.BLOBS_SITE_ID;
+    const token = process.env.BLOBS_TOKEN;
+    if (siteID && token) {
+      return getStore({ name: 'donations', siteID, token });
+    }
     return getStore('donations');
   } catch (err) {
     console.error('Netlify Blobs indisponible (getStore):', err.message);
