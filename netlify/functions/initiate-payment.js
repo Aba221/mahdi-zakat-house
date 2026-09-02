@@ -2,9 +2,12 @@
 // Initialise un don via PayDunya (architecture reprise de BRVM Analyst Pro :
 // on crée toujours la transaction "pending" en base AVANT d'appeler le
 // prestataire, pour avoir une référence interne fiable).
+//
+// Le stockage (Netlify Blobs) est toujours "best effort" : s'il échoue, le
+// paiement continue quand même — voir lib/donations-store.js.
 
-const { getStore } = require('@netlify/blobs');
 const { createInvoice } = require('./lib/paydunya');
+const { saveDonation } = require('./lib/donations-store');
 
 const POCHE_LABELS = {
   A: 'Zakat / Solidarité',
@@ -39,24 +42,20 @@ exports.handler = async (event) => {
   const SITE_URL = process.env.SITE_URL || `https://${event.headers.host}`;
   const refCommand = `MZH-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-  const store = getStore('donations');
+  const baseRecord = {
+    refCommand,
+    amount: numAmount,
+    method: method || '',
+    poche: poche || 'A',
+    frequence: frequence || 'unique',
+    nom, tel, email: email || '',
+    status: 'pending',
+    provider: 'paydunya',
+    createdAt: new Date().toISOString(),
+  };
 
-  // Transaction "pending" créée avant l'appel au prestataire.
-  try {
-    await store.setJSON(refCommand, {
-      refCommand,
-      amount: numAmount,
-      method: method || '',
-      poche: poche || 'A',
-      frequence: frequence || 'unique',
-      nom, tel, email: email || '',
-      status: 'pending',
-      provider: 'paydunya',
-      createdAt: new Date().toISOString(),
-    });
-  } catch (blobErr) {
-    console.error('Erreur stockage Netlify Blobs (avant paiement):', blobErr);
-  }
+  // Transaction "pending" créée avant l'appel au prestataire (best effort).
+  await saveDonation(refCommand, baseRecord);
 
   try {
     const { paymentUrl, providerReference } = await createInvoice({
@@ -73,22 +72,7 @@ exports.handler = async (event) => {
 
     // On enregistre la référence PayDunya (token) pour pouvoir revérifier
     // le paiement plus tard (webhook ET page de retour).
-    try {
-      await store.setJSON(refCommand, {
-        refCommand,
-        amount: numAmount,
-        method: method || '',
-        poche: poche || 'A',
-        frequence: frequence || 'unique',
-        nom, tel, email: email || '',
-        status: 'pending',
-        provider: 'paydunya',
-        providerReference,
-        createdAt: new Date().toISOString(),
-      });
-    } catch (blobErr) {
-      console.error('Erreur stockage Netlify Blobs (après création facture):', blobErr);
-    }
+    await saveDonation(refCommand, { ...baseRecord, providerReference });
 
     return {
       statusCode: 200,

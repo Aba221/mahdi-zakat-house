@@ -5,8 +5,8 @@
 // statut lui-même — le statut réel est toujours revérifié auprès de
 // PayDunya via verifyInvoice().
 
-const { getStore } = require('@netlify/blobs');
 const { verifyInvoice } = require('./lib/paydunya');
+const { getDonation, saveDonation } = require('./lib/donations-store');
 
 function parseBody(event) {
   const contentType = event.headers['content-type'] || event.headers['Content-Type'] || '';
@@ -16,8 +16,6 @@ function parseBody(event) {
     return JSON.parse(raw || '{}');
   }
 
-  // PayDunya envoie parfois en x-www-form-urlencoded avec un champ "data"
-  // contenant le JSON de la facture.
   const params = new URLSearchParams(raw || '');
   if (params.has('data')) {
     try {
@@ -49,8 +47,6 @@ exports.handler = async (event) => {
 
   const token = extractToken(body);
   if (!token) {
-    // On répond 200 quand même pour éviter que PayDunya ne renvoie en boucle
-    // une notification qu'on ne sait de toute façon pas traiter.
     return { statusCode: 200, body: JSON.stringify({ received: true }) };
   }
 
@@ -59,10 +55,8 @@ exports.handler = async (event) => {
     const refCommand = result.internalReference;
     if (!refCommand) return { statusCode: 200, body: JSON.stringify({ received: true }) };
 
-    const store = getStore('donations');
-    const existing = (await store.get(refCommand, { type: 'json' })) || {};
-
-    await store.setJSON(refCommand, {
+    const existing = (await getDonation(refCommand)) || {};
+    await saveDonation(refCommand, {
       ...existing,
       refCommand,
       status: result.status,
@@ -71,8 +65,6 @@ exports.handler = async (event) => {
     });
   } catch (err) {
     console.error('Erreur vérification webhook PayDunya:', err);
-    // On répond 200 pour éviter une boucle de retries agressive ; l'erreur
-    // est loguée côté Netlify pour investigation.
   }
 
   return { statusCode: 200, body: JSON.stringify({ received: true }) };

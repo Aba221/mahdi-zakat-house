@@ -4,8 +4,8 @@
 // paramètre d'URL "ref" ne sert qu'à retrouver la transaction, jamais à
 // décider du statut — on revérifie toujours réellement auprès de PayDunya.
 
-const { getStore } = require('@netlify/blobs');
 const { verifyInvoice } = require('./lib/paydunya');
+const { getDonation, saveDonation } = require('./lib/donations-store');
 
 exports.handler = async (event) => {
   const refCommand = event.queryStringParameters && event.queryStringParameters.ref;
@@ -13,15 +13,18 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ success: false, message: 'Référence manquante.' }) };
   }
 
-  const store = getStore('donations');
-  const donation = await store.get(refCommand, { type: 'json' });
+  const donation = await getDonation(refCommand);
 
+  // Si le stockage est indisponible ou que l'enregistrement est introuvable,
+  // on ne peut pas retrouver le token PayDunya : on l'indique clairement
+  // plutôt que de laisser croire à un échec de paiement.
   if (!donation) {
-    return { statusCode: 404, body: JSON.stringify({ success: false, message: 'Don introuvable.' }) };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true, status: 'unknown', message: "Statut introuvable, contactez-nous avec votre référence." }),
+    };
   }
 
-  // Déjà confirmé (ex: webhook arrivé avant le retour du donateur) : pas
-  // besoin de rappeler PayDunya.
   if (donation.status === 'completed' || donation.status === 'paid') {
     return { statusCode: 200, body: JSON.stringify({ success: true, status: 'completed', amount: donation.amount }) };
   }
@@ -32,19 +35,10 @@ exports.handler = async (event) => {
 
   try {
     const result = await verifyInvoice(donation.providerReference);
-
-    await store.setJSON(refCommand, {
-      ...donation,
-      status: result.status,
-      amountConfirmed: result.amount,
-      updatedAt: new Date().toISOString(),
-    });
-
+    await saveDonation(refCommand, { ...donation, status: result.status, amountConfirmed: result.amount, updatedAt: new Date().toISOString() });
     return { statusCode: 200, body: JSON.stringify({ success: true, status: result.status, amount: donation.amount }) };
   } catch (err) {
     console.error('Erreur confirm-payment:', err);
-    // On ne bloque pas l'affichage de la page si PayDunya est temporairement
-    // injoignable : on renvoie le dernier statut connu.
     return { statusCode: 200, body: JSON.stringify({ success: true, status: donation.status || 'pending', amount: donation.amount }) };
   }
 };

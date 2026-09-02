@@ -1,116 +1,56 @@
-// netlify/functions/lib/paydunya.js
-// Client PayDunya partagé, adapté du PayDunyaProvider validé en sandbox
-// sur BRVM Analyst Pro (payments/providers/paydunya.provider.ts).
-// Principe conservé : createInvoice() crée le lien de paiement,
-// verifyInvoice() revérifie TOUJOURS le statut réel auprès de PayDunya —
-// jamais de confiance aveugle dans un webhook ou un paramètre d'URL.
+// netlify/functions/lib/donations-store.js
+// Enveloppe sûre autour de Netlify Blobs pour le store "donations".
+// getStore() peut lever une erreur synchrone si Netlify Blobs n'est pas
+// disponible dans cet environnement (MissingBlobsEnvironmentError) — le
+// paiement lui-même ne doit JAMAIS dépendre de la réussite du stockage.
+// Toutes les fonctions ci-dessous avalent l'erreur et renvoient une valeur
+// neutre (null / false / tableau vide) au lieu de laisser planter l'appelant.
 
-function baseUrl() {
-  const mode = process.env.PAYDUNYA_MODE || 'sandbox';
-  return mode === 'live'
-    ? 'https://app.paydunya.com/api/v1'
-    : 'https://app.paydunya.com/sandbox-api/v1';
-}
+const { getStore } = require('@netlify/blobs');
 
-function headers() {
-  const masterKey = process.env.PAYDUNYA_MASTER_KEY;
-  const privateKey = process.env.PAYDUNYA_PRIVATE_KEY;
-  const token = process.env.PAYDUNYA_TOKEN;
-
-  if (!masterKey || !privateKey || !token) {
-    throw new Error('PayDunya : clés API manquantes (PAYDUNYA_MASTER_KEY / PAYDUNYA_PRIVATE_KEY / PAYDUNYA_TOKEN).');
+function safeGetStore() {
+  try {
+    return getStore('donations');
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (getStore):', err.message);
+    return null;
   }
-
-  return {
-    'Content-Type': 'application/json',
-    'PAYDUNYA-MASTER-KEY': masterKey,
-    'PAYDUNYA-PRIVATE-KEY': privateKey,
-    'PAYDUNYA-TOKEN': token,
-  };
 }
 
-/**
- * Crée une facture PayDunya et renvoie l'URL de paiement à laquelle
- * rediriger le donateur.
- */
-async function createInvoice({
-  amount,
-  description,
-  customerName,
-  customerEmail,
-  customerPhone,
-  internalReference,
-  returnUrl,
-  cancelUrl,
-  callbackUrl,
-}) {
-  const res = await fetch(`${baseUrl()}/checkout-invoice/create`, {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify({
-      invoice: {
-        total_amount: Math.round(amount),
-        description,
-        customer: {
-          name: customerName,
-          email: customerEmail || '',
-          phone: customerPhone || '',
-        },
-      },
-      store: {
-        name: 'Mahdi Zakat House',
-      },
-      custom_data: {
-        internal_reference: internalReference,
-      },
-      actions: {
-        cancel_url: cancelUrl,
-        return_url: returnUrl,
-        callback_url: callbackUrl,
-      },
-    }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok || data.response_code !== '00') {
-    throw new Error(`PayDunya : impossible de créer le lien de paiement (${data.response_text || res.status}).`);
+async function saveDonation(refCommand, data) {
+  const store = safeGetStore();
+  if (!store) return false;
+  try {
+    await store.setJSON(refCommand, data);
+    return true;
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (setJSON):', err.message);
+    return false;
   }
-
-  return {
-    paymentUrl: data.response_text, // PayDunya renvoie l'URL de paiement dans response_text
-    providerReference: data.token,
-  };
 }
 
-const STATUS_MAP = {
-  pending: 'pending',
-  completed: 'completed',
-  cancelled: 'cancelled',
-  failed: 'failed',
-};
-
-/**
- * Revérifie le statut réel d'une facture auprès de PayDunya (jamais à
- * partir du seul contenu d'un webhook ou d'une redirection).
- */
-async function verifyInvoice(providerReference) {
-  const res = await fetch(`${baseUrl()}/checkout-invoice/confirm/${providerReference}`, {
-    method: 'GET',
-    headers: headers(),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok || data.response_code !== '00') {
-    throw new Error(`PayDunya : impossible de vérifier le paiement (${data.response_text || res.status}).`);
+async function getDonation(refCommand) {
+  const store = safeGetStore();
+  if (!store) return null;
+  try {
+    return await store.get(refCommand, { type: 'json' });
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (get):', err.message);
+    return null;
   }
-
-  return {
-    status: STATUS_MAP[data.status] || 'pending',
-    amount: data.invoice ? data.invoice.total_amount : undefined,
-    internalReference: data.custom_data ? data.custom_data.internal_reference : undefined,
-  };
 }
 
-module.exports = { createInvoice, verifyInvoice };
+async function listDonations() {
+  const store = safeGetStore();
+  if (!store) return [];
+  try {
+    const { blobs } = await store.list();
+    const records = await Promise.all(blobs.slice(-50).map((b) => store.get(b.key, { type: 'json' })));
+    return records.filter(Boolean);
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (list):', err.message);
+    return [];
+  }
+}
+
+module.exports = { saveDonation, getDonation, listDonations };
