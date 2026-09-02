@@ -8,6 +8,8 @@ function formatFCFA(n){
 
 function computeZakat(){
   const revenu = parseFloat(revenuInput.value) || 0;
+  // "La zakat sur toutes les sources de revenus, à chaud" : 1/40 s'applique
+  // directement sur le montant renseigné, quelle que soit sa périodicité.
   const zakat = revenu / 40;
   calcOutput.textContent = formatFCFA(zakat);
   calcToDon.dataset.suggestedAmount = Math.max(500, Math.round(zakat));
