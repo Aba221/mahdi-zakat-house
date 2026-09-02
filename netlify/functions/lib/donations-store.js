@@ -1,0 +1,56 @@
+// netlify/functions/lib/donations-store.js
+// Enveloppe sûre autour de Netlify Blobs pour le store "donations".
+// getStore() peut lever une erreur synchrone si Netlify Blobs n'est pas
+// disponible dans cet environnement (MissingBlobsEnvironmentError) — le
+// paiement lui-même ne doit JAMAIS dépendre de la réussite du stockage.
+// Toutes les fonctions ci-dessous avalent l'erreur et renvoient une valeur
+// neutre (null / false / tableau vide) au lieu de laisser planter l'appelant.
+
+const { getStore } = require('@netlify/blobs');
+
+function safeGetStore() {
+  try {
+    return getStore('donations');
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (getStore):', err.message);
+    return null;
+  }
+}
+
+async function saveDonation(refCommand, data) {
+  const store = safeGetStore();
+  if (!store) return false;
+  try {
+    await store.setJSON(refCommand, data);
+    return true;
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (setJSON):', err.message);
+    return false;
+  }
+}
+
+async function getDonation(refCommand) {
+  const store = safeGetStore();
+  if (!store) return null;
+  try {
+    return await store.get(refCommand, { type: 'json' });
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (get):', err.message);
+    return null;
+  }
+}
+
+async function listDonations() {
+  const store = safeGetStore();
+  if (!store) return [];
+  try {
+    const { blobs } = await store.list();
+    const records = await Promise.all(blobs.slice(-50).map((b) => store.get(b.key, { type: 'json' })));
+    return records.filter(Boolean);
+  } catch (err) {
+    console.error('Netlify Blobs indisponible (list):', err.message);
+    return [];
+  }
+}
+
+module.exports = { saveDonation, getDonation, listDonations };
