@@ -14,11 +14,29 @@
 </header>
 <section style="padding:120px 0; text-align:left">
   <div class="wrap" style="max-width:640px">
-    <p class="hero-eyebrow">Qu'Allah accepte votre don</p>
-    <h1 style="font-size:2.6rem">Jazakallah khayran.</h1>
-    <p class="lede" style="margin-top:18px">Votre Zakat a été reçue. Un reçu vous sera envoyé si vous avez renseigné votre email. Votre contribution rejoint la poche Zakat / Solidarité et sera redistribuée selon les critères désignés dans le Coran, avec un suivi assuré par la cellule d'accompagnement.</p>
-    <div class="hero-actions">
-      <a href="/" class="btn-primary">Retour à l'accueil</a>
+    <div id="statusPending">
+      <p class="hero-eyebrow">Vérification en cours</p>
+      <h1 style="font-size:2.2rem">Un instant, nous confirmons votre don…</h1>
+      <p class="lede" style="margin-top:18px">Nous vérifions le statut réel de votre paiement auprès de notre partenaire.</p>
+    </div>
+
+    <div id="statusSuccess" style="display:none">
+      <p class="hero-eyebrow">Qu'Allah accepte votre don</p>
+      <h1 style="font-size:2.6rem">Jazakallah khayran.</h1>
+      <p class="lede" style="margin-top:18px">Votre Zakat de <strong id="successAmount"></strong> FCFA a été reçue. Un reçu vous sera envoyé si vous avez renseigné votre email. Votre contribution rejoint le compartiment choisi et sera redistribuée selon les critères désignés dans le Coran, avec un suivi assuré par la cellule d'accompagnement.</p>
+      <div class="hero-actions">
+        <a href="/" class="btn-primary">Retour à l'accueil</a>
+      </div>
+    </div>
+
+    <div id="statusFailed" style="display:none">
+      <p class="hero-eyebrow">Paiement non confirmé</p>
+      <h1 style="font-size:2.2rem">Nous n'avons pas pu confirmer ce paiement.</h1>
+      <p class="lede" style="margin-top:18px">Si un montant a été débité chez vous, contactez-nous avec votre référence pour vérification manuelle : <strong id="failedRef"></strong></p>
+      <div class="hero-actions">
+        <a href="/#don" class="btn-primary">Réessayer</a>
+        <a href="/" class="btn-ghost">Retour à l'accueil</a>
+      </div>
     </div>
   </div>
 </section>
@@ -30,5 +48,40 @@
     </div>
   </div>
 </footer>
+<script>
+(async function(){
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  const pending = document.getElementById('statusPending');
+  const success = document.getElementById('statusSuccess');
+  const failed = document.getElementById('statusFailed');
+
+  if (!ref) {
+    pending.style.display = 'none';
+    failed.style.display = 'block';
+    document.getElementById('failedRef').textContent = 'référence inconnue';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/confirm-payment?ref=' + encodeURIComponent(ref));
+    const data = await res.json();
+
+    pending.style.display = 'none';
+
+    if (data.success && data.status === 'completed') {
+      success.style.display = 'block';
+      document.getElementById('successAmount').textContent = Number(data.amount || 0).toLocaleString('fr-FR');
+    } else {
+      failed.style.display = 'block';
+      document.getElementById('failedRef').textContent = ref;
+    }
+  } catch (e) {
+    pending.style.display = 'none';
+    failed.style.display = 'block';
+    document.getElementById('failedRef').textContent = ref;
+  }
+})();
+</script>
 </body>
 </html>
