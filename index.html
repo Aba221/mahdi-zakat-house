@@ -8,6 +8,16 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icons/icon-192.png">
 <link rel="stylesheet" href="/css/style.css">
+<script>
+// Redirige les liens d'invitation/confirmation/récupération Netlify Identity
+// vers /admin.html, la seule page équipée du widget pour les traiter.
+(function () {
+  var h = window.location.hash;
+  if (h && /(invite_token|confirmation_token|recovery_token|access_token)=/.test(h)) {
+    window.location.replace('/admin.html' + h);
+  }
+})();
+</script>
 </head>
 <body>
 
