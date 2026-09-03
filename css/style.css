@@ -127,10 +127,10 @@ button{font-family:var(--sans); cursor:pointer;}
 .brand .word b{font-family:var(--serif); font-size:19px; font-weight:600;}
 .brand .word span{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent);}
 
-nav.main-nav{display:flex; gap:22px}
+nav.main-nav{display:flex; gap:16px}
 nav.main-nav a{
   text-decoration:none; color: color-mix(in srgb, var(--color-text) 75%, transparent);
-  font-size:0.92rem; font-weight:500;
+  font-size:0.85rem; font-weight:500; white-space:nowrap;
   padding:6px 0; border-bottom:2px solid transparent; transition:border-color .15s, color .15s;
 }
 nav.main-nav a:hover{color:var(--color-accent-700); border-color:var(--color-accent)}
@@ -417,3 +417,44 @@ footer a:hover{color:var(--white)}
   .qr-box{flex-direction:column; text-align:center}
   footer .wrap{grid-template-columns:1fr; gap:28px}
 }
+
+/* ---------- Module pédagogique "Comprendre la Zakat" (additif) ---------- */
+.toc-nav{display:flex; flex-wrap:wrap; gap:10px; margin:30px 0 6px}
+.toc-chip{
+  border:1px solid var(--color-divider); background:var(--white); padding:9px 15px;
+  font-family:var(--serif); font-weight:600; font-size:0.82rem; color:var(--color-accent-800);
+  text-decoration:none; transition:border-color .15s;
+}
+.toc-chip:hover{border-color:var(--color-accent); color:var(--color-accent-700)}
+
+.edu-section{padding:60px 0; border-bottom:1px solid var(--color-divider)}
+.edu-section:last-of-type{border-bottom:none}
+.edu-section .kicker-num{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:30px; height:30px; border:1px solid var(--color-divider);
+  font-family:var(--serif); font-weight:600; font-size:0.85rem; color:var(--color-accent);
+  margin-right:10px;
+}
+
+.callout{border-left:3px solid var(--color-divider); padding:18px 24px; margin:26px 0; background:var(--color-bg); max-width:70ch}
+.callout-label{display:block; font-family:var(--serif); font-weight:600; font-size:0.76rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px}
+.callout p{font-size:0.94rem; color:color-mix(in srgb, var(--color-text) 80%, transparent); max-width:66ch}
+.callout-retenir{border-left-color:var(--color-accent)}
+.callout-retenir .callout-label{color:var(--color-accent-700)}
+.callout-exemple{border-left-color:#2f7b5e}
+.callout-exemple .callout-label{color:#2f7b5e}
+.callout-important{border-left-color:var(--color-gold); background:color-mix(in srgb, var(--color-gold) 7%, var(--color-bg))}
+.callout-important .callout-label{color:#a6841e}
+
+.validation-flag{
+  display:inline-block; margin-top:14px; padding:7px 14px; border:1px dashed var(--color-gold);
+  color:#a6841e; font-size:0.76rem; font-weight:600; font-family:var(--serif);
+  text-transform:uppercase; letter-spacing:.05em;
+}
+
+.edu-crosslink{
+  display:inline-flex; align-items:center; gap:6px; margin-top:18px;
+  font-family:var(--serif); font-weight:600; font-size:0.92rem; color:var(--color-accent-700);
+  text-decoration:none;
+}
+.edu-crosslink:hover{color:var(--color-accent-600)}
