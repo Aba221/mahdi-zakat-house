@@ -10,9 +10,9 @@ const { getStore } = require('@netlify/blobs');
 
 function safeGetStore() {
   try {
-    // Configuration manuelle (BLOBS_SITE_ID / BLOBS_TOKEN) si la
-    // configuration automatique de Netlify Blobs n'est pas disponible sur
-    // ce site — voir README pour comment obtenir ces deux valeurs.
+    // Configuration manuelle (BLOBS_SITE_ID / BLOBS_TOKEN) en repli, si
+    // jamais connectLambda() (appelé dans chaque fonction avant celle-ci)
+    // ne suffisait pas sur ce compte.
     const siteID = process.env.BLOBS_SITE_ID;
     const token = process.env.BLOBS_TOKEN;
     if (siteID && token) {
@@ -48,12 +48,13 @@ async function getDonation(refCommand) {
   }
 }
 
-async function listDonations() {
+async function listDonations(limit = 50) {
   const store = safeGetStore();
   if (!store) return [];
   try {
     const { blobs } = await store.list();
-    const records = await Promise.all(blobs.slice(-50).map((b) => store.get(b.key, { type: 'json' })));
+    const selected = limit ? blobs.slice(-limit) : blobs;
+    const records = await Promise.all(selected.map((b) => store.get(b.key, { type: 'json' })));
     return records.filter(Boolean);
   } catch (err) {
     console.error('Netlify Blobs indisponible (list):', err.message);

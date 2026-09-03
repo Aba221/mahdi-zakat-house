@@ -20,6 +20,7 @@
     <nav class="main-nav" id="mainNav">
       <a href="#modele">Le modèle</a>
       <a href="#transparence">Transparence</a>
+      <a href="#impact">Chiffres</a>
       <a href="#calculette">Calculer ma Zakat</a>
       <a href="#redistribution">Bénéficiaires</a>
       <a href="#faq">FAQ</a>
@@ -195,6 +196,58 @@
           <div class="tag">Poche D</div>
           <div><h4>Contributions volontaires</h4></div>
           <p>Dons et waqf destinés au renforcement du capital et aux investissements structurants de la communauté.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPACT EN TEMPS REEL -->
+  <section id="impact">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="kicker">En temps réel</p>
+        <h2>Ce qui a déjà été collecté</h2>
+        <p class="lede">Mis à jour automatiquement à chaque don confirmé — aucune donnée n'est retouchée à la main.</p>
+      </div>
+
+      <div class="blueprint" style="padding:clamp(28px,4vw,40px); margin-bottom:20px;" id="impactEmpty">
+        <p style="font-style:italic; color:color-mix(in srgb, var(--color-text) 65%, transparent)">La collecte démarre tout juste — les premiers totaux s'afficheront ici dès les premiers dons confirmés.</p>
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      </div>
+
+      <div id="impactContent" style="display:none">
+        <div class="blueprint" style="padding:clamp(28px,4vw,40px); margin-bottom:20px;">
+          <div style="font-family:var(--serif); font-size:0.85rem; letter-spacing:.1em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Total collecté depuis le lancement</div>
+          <div style="font-family:var(--serif); font-size:clamp(2.4rem,5vw,3.2rem); font-weight:600; color:var(--color-accent-800);" id="statTotalCollecte">—</div>
+          <p style="margin-top:10px; font-size:0.9rem; color:color-mix(in srgb, var(--color-text) 65%, transparent)" id="statDonorCount"></p>
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
+          <div class="blueprint" style="padding:22px;">
+            <span class="tag" style="display:inline-grid; place-items:center; border:1px solid var(--color-divider); padding:6px 12px; font-family:var(--serif); font-weight:600; color:var(--color-accent); margin-bottom:12px;">Poche A</span>
+            <div style="font-family:var(--serif); font-size:1.5rem; font-weight:600;" id="statPocheA">—</div>
+            <p style="font-size:0.85rem; color:color-mix(in srgb, var(--color-text) 65%, transparent)">Zakat / Solidarité</p>
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          </div>
+          <div class="blueprint" style="padding:22px;">
+            <span class="tag" style="display:inline-grid; place-items:center; border:1px solid var(--color-divider); padding:6px 12px; font-family:var(--serif); font-weight:600; color:var(--color-gold); margin-bottom:12px;">Poche B</span>
+            <div style="font-family:var(--serif); font-size:1.5rem; font-weight:600;" id="statPocheB">—</div>
+            <p style="font-size:0.85rem; color:color-mix(in srgb, var(--color-text) 65%, transparent)">Soudure / Résilience</p>
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          </div>
+          <div class="blueprint" style="padding:22px;">
+            <span class="tag" style="display:inline-grid; place-items:center; border:1px solid var(--color-divider); padding:6px 12px; font-family:var(--serif); font-weight:600; color:#2f7b5e; margin-bottom:12px;">Poche C</span>
+            <div style="font-family:var(--serif); font-size:1.5rem; font-weight:600;" id="statPocheC">—</div>
+            <p style="font-size:0.85rem; color:color-mix(in srgb, var(--color-text) 65%, transparent)">Capital productif</p>
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          </div>
+          <div class="blueprint" style="padding:22px;">
+            <span class="tag" style="display:inline-grid; place-items:center; border:1px solid var(--color-divider); padding:6px 12px; font-family:var(--serif); font-weight:600; color:var(--color-accent-900); margin-bottom:12px;">Poche D</span>
+            <div style="font-family:var(--serif); font-size:1.5rem; font-weight:600;" id="statPocheD">—</div>
+            <p style="font-size:0.85rem; color:color-mix(in srgb, var(--color-text) 65%, transparent)">Contribution volontaire</p>
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -410,5 +463,6 @@ if ('serviceWorker' in navigator) {
 <script src="/js/paiement.js"></script>
 <script src="/js/ticker.js"></script>
 <script src="/js/qr.js"></script>
+<script src="/js/stats.js"></script>
 </body>
 </html>
